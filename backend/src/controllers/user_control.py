@@ -4,79 +4,33 @@ from firebase_admin import auth, firestore
 from werkzeug.security import generate_password_hash
 
 from models import User
+from repositories.repository import CourseRepository, DisciplineRepository
 
 
 class UserControl:
+    def __init__(self, user):
+        # if not isinstance(user, Admin):
+        #     raise PermissionError("O usuário não possui privilégios de administrador.")
+        self.user = user
 
-    def __init__(self):
-        self.db = firestore.client()  # Conexão com Firestore
+    def get_course(self, course_id):
+        """Obtém um curso pelo seu ID."""
+        data = CourseRepository.get(course_id)
+        return data, course_id
 
-    def create_user(self, name: str, email: str, password: str, role: str = "student", phone: Optional[str] = None):
-        """
-        Cria um novo usuário e o salva no Firebase e Firestore.
+    def get_all_courses(self):
+        """Obtém todos os cursos disponíveis."""
+        courses = CourseRepository.get_all()
+        print("Courses from repository:", courses)  # Adicione este print para depuração
+        return courses
 
-        :param name: Nome do usuário.
-        :param email: Email do usuário.
-        :param password: Senha do usuário (deve ser hasheada antes de armazenar).
-        :param role: Papel do usuário (padrão é "student").
-        :param phone: Telefone do usuário (opcional).
-        :return: ID do usuário criado ou None em caso de erro.
-        """
-        hashed_password = generate_password_hash(password)
-        user = User(name, email, hashed_password, role, phone)
-        return self._save_user_to_firebase(user)
+    def get_discipline(self, course_id, discipline_id):
+        """Obtém uma disciplina pelo seu ID dentro do curso especificado."""
+        return DisciplineRepository.get(course_id, discipline_id)
 
-    def _save_user_to_firebase(self, user: User):
-        try:
-            # Cria o usuário no Firebase Authentication
-            user_record = auth.create_user(
-                email=user.email,
-                password=user.password,
-                display_name=user.name,
-            )
-
-            # Adiciona uma entrada no Firestore
-            self.db.collection('users').document(user_record.uid).set({
-                'name': user.name,
-                'email': user.email,
-                'role': user.role,
-                'phone': user.phone
-            })
-
-            return user_record.uid  # Retorna o ID do usuário criado
-
-        except Exception as e:
-            print(f"Error creating user: {e}")
-            return None
-
-    @staticmethod
-    def get_user(self, uid: str):
-        try:
-            user_record = auth.get_user(uid)
-            user_data = self.db.collection('users').document(uid).get()
-
-            if user_data.exists:
-                return user_data.to_dict()  # Retorna os dados do usuário como um dicionário
-
-            return None
-        except Exception as e:
-            print(f"Error fetching user: {e}")
-            return None
-
-    def get_all_users(self):
-        try:
-            users_ref = self.db.collection('users')
-            docs = users_ref.stream()  # Obtém todos os documentos na coleção
-
-            all_users = []
-            for doc in docs:
-                user_data = doc.to_dict()  # Converte o documento em um dicionário
-                all_users.append(user_data)  # Adiciona o dicionário à lista de todos os usuários
-            print(all_users)
-            return all_users  # Retorna a lista de todos os usuários
-        except Exception as e:
-            print(f"Error fetching users: {e}")
-            return []
+    def get_all_disciplines(self, course_id):
+        """Obtém todas as disciplinas de um curso especificado."""
+        return DisciplineRepository.get_all_disciplines_in_course(course_id)
 
     def update_user_role(self, uid: str, new_role: str):
         try:

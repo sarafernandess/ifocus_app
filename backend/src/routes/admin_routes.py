@@ -38,23 +38,6 @@ def create_course(course: CourseCreate, admin: AdminControl = Depends(get_curren
     except Exception as e:
         raise HTTPException(status_code=400, detail={"error": f"Error creating course: {str(e)}"})
 
-@router.get("/courses", response_model=List[CourseResponse])
-def get_courses(course_id: Optional[str] = Query(None), admin: AdminControl = Depends(get_current_admin)):
-    try:
-        if course_id:
-            course = admin.get_course(course_id)
-            if not course:
-                raise HTTPException(status_code=404, detail={"error": "Course not found"})
-            # Criar e retornar uma instância de CourseResponse
-            return CourseResponse.from_course(course)
-        else:
-            all_courses = admin.get_all_courses()
-            # Criar e retornar uma lista de CourseResponse
-            return [CourseResponse.from_course(c) for c in all_courses]
-    except Exception as e:
-        logging.error(f"Error retrieving courses: {str(e)}")
-        raise HTTPException(status_code=500, detail={"error": "Internal server error"})
-
 
 @router.put("/courses/{course_id}", response_model=CourseResponse)
 def update_course(course_id: str, course: CourseCreate, admin: AdminControl = Depends(get_current_admin)):
@@ -75,36 +58,6 @@ def delete_course(course_id: str, admin: AdminControl = Depends(get_current_admi
         return Response(status_code=204)
     except Exception as e:
         raise HTTPException(status_code=400, detail={"error": f"Error deleting course: {str(e)}"})
-
-
-@router.get("/courses/{course_id}/disciplines", response_model=List[DisciplineResponse])
-def get_disciplines(course_id: str,discipline_id: Optional[str] = Query(None),admin: AdminControl = Depends(get_current_admin)):
-    try:
-        if discipline_id:
-            # Buscar uma única disciplina associada ao course_id
-            discipline = admin.get_discipline(course_id=course_id, discipline_id=discipline_id)
-            if not discipline:
-                raise HTTPException(status_code=404, detail="Discipline not found")
-            return DisciplineResponse(
-                id=discipline.id,
-                name=discipline.name,
-                code=discipline.code,
-                semester=discipline.semester
-            )
-        else:
-            # Buscar todas as disciplinas associadas ao course_id
-            all_disciplines = admin.get_all_disciplines(course_id=course_id)
-            return [
-                DisciplineResponse(
-                    id=d.id,
-                    name=d.name,
-                    code=d.code,
-                    semester=d.semester
-                )
-                for d in all_disciplines
-            ]
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error retrieving disciplines: {str(e)}")
 
 @router.post("/courses/{course_id}/disciplines", response_model=DisciplineResponse, status_code=201)
 def create_discipline(course_id: str, discipline: DisciplineCreate, admin: AdminControl = Depends(get_current_admin)):

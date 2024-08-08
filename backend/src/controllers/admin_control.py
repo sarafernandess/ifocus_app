@@ -1,11 +1,9 @@
 from models import Course, Discipline
 from repositories.repository import CourseRepository, DisciplineRepository
+from user_control import UserControl
 
-class AdminControl:
-    def __init__(self, user):
-        # if not isinstance(user, Admin):
-        #     raise PermissionError("O usuário não possui privilégios de administrador.")
-        self.user = user
+
+class AdminControl(UserControl):
 
     def create_course(self, id: None, name, code):
         """Cria um novo curso com o nome e código fornecidos."""
@@ -14,17 +12,6 @@ class AdminControl:
         created_course_id = CourseRepository.create(course)
         # Retorna o ID do curso criado
         return created_course_id
-
-    def get_course(self, course_id):
-        """Obtém um curso pelo seu ID."""
-        data = CourseRepository.get(course_id)
-        return data, course_id
-
-    def get_all_courses(self):
-        """Obtém todos os cursos disponíveis."""
-        courses = CourseRepository.get_all()
-        print("Courses from repository:", courses)  # Adicione este print para depuração
-        return courses
 
     def update_course(self, course_id, name=None, code=None):
         """Atualiza um curso existente com os novos valores fornecidos."""
@@ -44,10 +31,6 @@ class AdminControl:
         discipline = Discipline(id=id, name=name, code=code, semester=semester)
         return DisciplineRepository.create(discipline, course_id=course_id)
 
-    def get_discipline(self, course_id, discipline_id):
-        """Obtém uma disciplina pelo seu ID dentro do curso especificado."""
-        return DisciplineRepository.get(course_id, discipline_id)
-
     def update_discipline(self, course_id, discipline_id, name=None, code=None, semester=None):
         """Atualiza uma disciplina existente com os novos valores fornecidos."""
         updates = {}
@@ -62,10 +45,6 @@ class AdminControl:
     def delete_discipline(self, course_id, discipline_id):
         """Deleta uma disciplina pelo seu ID dentro do curso especificado."""
         DisciplineRepository.delete(course_id, discipline_id)
-
-    def get_all_disciplines(self, course_id):
-        """Obtém todas as disciplinas de um curso especificado."""
-        return DisciplineRepository.get_all_disciplines_in_course(course_id)
 
     def delete_all(self):
         return CourseRepository.delete_all()
