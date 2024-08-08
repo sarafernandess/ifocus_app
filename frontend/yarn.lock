@@ -6636,6 +6636,13 @@ react-is@^18.0.0:
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.3.1.tgz"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
+react-native-element-dropdown@^2.12.1:
+  version "2.12.1"
+  resolved "https://registry.npmjs.org/react-native-element-dropdown/-/react-native-element-dropdown-2.12.1.tgz"
+  integrity sha512-Z3uWNFBoezDEsy9AZJxoDc9DxoAdfeprUjaInmbuzYOk6R0Y0UZ659JIalX20XNvrNRWJUfSZwbM94jWYNsIyw==
+  dependencies:
+    lodash "^4.17.21"
+
 react-native-gesture-handler@^2.17.1:
   version "2.17.1"
   resolved "https://registry.npmjs.org/react-native-gesture-handler/-/react-native-gesture-handler-2.17.1.tgz"
