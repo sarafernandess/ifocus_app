@@ -6,6 +6,7 @@ import OfferHelpScreen from '../../screens/OfferHelpScreen';
 import ReceiveHelpScreen from '../../screens/ReceiveHelpScreen';
 import MainTabNavigator from '../../components/MainTabNavigator';
 import ManageDisciplineScreen from '../../screens/AdminPanelScreen/ManageDisciplineScreen';
+import SelectDisciplinesScreen from '../../screens/ReceiveHelpScreen/SelectDisciplinesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ function AppNavigator() {
       {/* <Stack.Screen name="OfferHelp" component={OfferHelpScreen} />
       <Stack.Screen name="ReceiveHelp" component={ReceiveHelpScreen} /> */}
       <Stack.Screen name="ManageDisciplineScreen" component={ManageDisciplineScreen} />
+      <Stack.Screen name="SelectDisciplinesScreen" component={SelectDisciplinesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -48,7 +48,7 @@ const ManageDisciplineScreen = () => {
   const fetchDisciplines = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/admin/courses/${courseId}/disciplines`);
+      const response = await api.get(`/courses/${courseId}/disciplines`);
       setDisciplines(response.data);
     } catch (error) {
       console.error('Error fetching disciplines:', error);

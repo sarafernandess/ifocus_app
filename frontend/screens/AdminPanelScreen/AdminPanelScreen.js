@@ -30,7 +30,7 @@ const AdminPanelScreen = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/admin/courses');
+      const response = await api.get('/courses');
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
