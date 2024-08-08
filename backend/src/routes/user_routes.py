@@ -1,66 +1,69 @@
 # src/routes/user_routes.py
 import logging
-from typing import Optional
+from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
+
+from admin_routes import DisciplineResponse
+from src.controllers.auth_control import AuthControl, oauth2_scheme
+from models import CourseResponse
 from user_control import UserControl
 
 router = APIRouter()
-user_controller = UserControl()
+auth_control = AuthControl()
 
-class UserCreateRequest(BaseModel):
-    name: str
-    email: str
-    password: str
-    role: str = "student"
-    phone: Optional[str] = None
 
-class UserUpdateRoleRequest(BaseModel):
-    role: str
+def get_user(token: str = Depends(oauth2_scheme)) -> UserControl:
+    user = auth_control.get_current_user(token)
+    return UserControl(user)
 
-uid = []
-@router.post("/register")
-async def create_user(request: UserCreateRequest):
+
+@router.get("/courses", response_model=List[CourseResponse])
+def get_courses(course_id: Optional[str] = Query(None), user: UserControl = Depends(get_user)):
     try:
-        user_id = user_controller.create_user(
-            name=request.name,
-            email=request.email,
-            password=request.password,
-            phone=request.phone,
-            role=request.role
-        )
-        if user_id:
-            uid.append(user_id)
-            return {"user_id": user_id}
+        if course_id:
+            course = user.get_course(course_id)
+            if not course:
+                raise HTTPException(status_code=404, detail={"error": "Course not found"})
+            # Criar e retornar uma instância de CourseResponse
+            return CourseResponse.from_course(course)
         else:
-            raise HTTPException(status_code=400, detail="Error creating user")
+            all_courses = user.get_all_courses()
+            # Criar e retornar uma lista de CourseResponse
+            return [CourseResponse.from_course(c) for c in all_courses]
     except Exception as e:
-        # Log the error for internal debugging
-        logging.error(f"Error creating user: {e}")
-        # Return a more generic error message to the user
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logging.error(f"Error retrieving courses: {str(e)}")
+        raise HTTPException(status_code=500, detail={"error": "Internal server error"})
 
-@router.get("/users/{uid}")
-async def get_user(uid: str):
-    user = user_controller.get_user(uid)
-    if user:
-        return user
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
 
-@router.put("/users/{uid}/role")
-async def update_user_role(uid: str, request: UserUpdateRoleRequest):
-    success = user_controller.update_user_role(uid, request.role)
-    if success:
-        return {"status": "success"}
-    else:
-        raise HTTPException(status_code=400, detail="Error updating user role")
+@router.get("/courses/{course_id}/disciplines", response_model=List[DisciplineResponse])
+def get_disciplines(course_id: str,discipline_id: Optional[str] = Query(None), user: UserControl = Depends(get_user)):
+    try:
+        if discipline_id:
+            # Buscar uma única disciplina associada ao course_id
+            discipline = user.get_discipline(course_id=course_id, discipline_id=discipline_id)
+            if not discipline:
+                raise HTTPException(status_code=404, detail="Discipline not found")
+            return DisciplineResponse(
+                id=discipline.id,
+                name=discipline.name,
+                code=discipline.code,
+                semester=discipline.semester
+            )
+        else:
+            # Buscar todas as disciplinas associadas ao course_id
+            all_disciplines = user.get_all_disciplines(course_id=course_id)
+            return [
+                DisciplineResponse(
+                    id=d.id,
+                    name=d.name,
+                    code=d.code,
+                    semester=d.semester
+                )
+                for d in all_disciplines
+            ]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error retrieving disciplines: {str(e)}")
 
-@router.delete("/users/{uid}")
-async def delete_user(uid: str):
-    success = user_controller.delete_user(uid)
-    if success:
-        return {"status": "success"}
-    else:
-        raise HTTPException(status_code=400, detail="Error deleting user")
+

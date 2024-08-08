@@ -14,7 +14,9 @@ if not firebase_admin._apps:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class AuthControl:
-    def get_current_user(self, token: str) -> User:
+
+    @staticmethod
+    def get_current_user(token: str) -> User:
         try:
             decoded_token = auth.verify_id_token(token)
             uid = decoded_token['uid']
@@ -33,8 +35,10 @@ class AuthControl:
         except Exception as e:
             raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    def is_admin(self, token: str = Depends(oauth2_scheme)) -> Admin:
-        user = self.get_current_user(token)
+    @classmethod
+    def is_admin(cls, token: str = Depends(oauth2_scheme)) -> Admin:
+        user = cls.get_current_user(token)
         if user.role != 'admin':
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         return Admin(name=user.name, email=user.email, phone=user.phone)
+

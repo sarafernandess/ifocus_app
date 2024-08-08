@@ -9,6 +9,7 @@ from configs.firebase_config import initialize_firebase
 initialize_firebase()
 # from routes.user_routes import router as user_router
 from routes.admin_routes import router as admin_router
+from routes.user_routes import router as user_router
 # Importa as novas rotas
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app.add_middleware(
 
 # Incluir rotas
 app.include_router(admin_router, prefix="/admin")
+app.include_router(user_router)
 
 
 @app.get("/")
