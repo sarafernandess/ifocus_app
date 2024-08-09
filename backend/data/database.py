@@ -34,7 +34,7 @@ class Db:
         if doc.exists:
             return doc.to_dict()
         else:
-            return None
+            return {}
 
     @staticmethod
     def update_document(collection_name, document_id, updates):
