@@ -12,12 +12,11 @@ class UserControl:
 
     def __init__(self, user):
         """
+        Inicializa o controlador de usuários com um usuário.
         Inicializa o controlador de admin com um usuário.
-
         :param user: Instância do usuário que está controlando.
         """
-        super().__init__(user)  # Chama o construtor da classe pai (UserControl)
-
+        self.user = user
 
     def get_course(self, course_id):
         """Obtém um curso pelo seu ID."""
