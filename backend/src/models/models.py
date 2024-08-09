@@ -108,7 +108,7 @@ class Course(BaseModel):
         )
 
 class CourseResponse(BaseModel):
-    id: Optional[str]  # Adiciona o campo UID opcional
+    id: Optional[str]
     name: str
     code: str
 
