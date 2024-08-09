@@ -24,9 +24,10 @@ class DisciplineResponse(BaseModel):
     code: str
     semester: int
 
+# Função para obter o administrador atual a partir do token de autenticação
 def get_current_admin(token: str = Depends(oauth2_scheme)) -> AdminControl:
-    user = auth_control.is_admin(token)
-    return AdminControl(user)
+    user = auth_control.is_admin(token)  # Verifica se o token pertence a um administrador
+    return AdminControl(user)  # Retorna uma instância de AdminControl para o administrador autenticado
 
 @router.post("/courses", response_model=CourseResponse, status_code=201)
 def create_course(course: CourseCreate, admin: AdminControl = Depends(get_current_admin)):

@@ -5,20 +5,19 @@ from repositories.repository import CourseRepository, DisciplineRepository, User
 
 
 class UserControl:
-    def __init__(self, user):
-        def __init__(self, user, repository):
-            """
-            Inicializa o controlador de usuários com um usuário e um repositório.
+    """
+    Controlador de Usuários.
+    Gerencia as interações entre usuários, cursos e disciplinas usando os repositórios.
+    """
 
-            :param user: Instância do usuário.
-            :param repository: Instância do repositório para interagir com o banco de dados.
-            """
-            # Verifica se o usuário possui privilégios de administrador.
-            # Descomente a linha abaixo se desejar forçar a verificação do tipo de usuário.
-            # if not isinstance(user, Admin):
-            #     raise PermissionError("O usuário não possui privilégios de administrador.")
-            self.user = user
-            # self.repository = repository
+    def __init__(self, user):
+        """
+        Inicializa o controlador de usuários com um usuário.
+
+        :param user: Instância do usuário que está controlando.
+        """
+        self.user = user
+
 
     def get_course(self, course_id):
         """Obtém um curso pelo seu ID."""
@@ -101,6 +100,14 @@ class UserControl:
 
 
     def remove_user_from_disciplines(self, user_id: str, course_id: str, discipline_ids: List[str], type_help: str):
+        """
+        Remove um usuário de várias disciplinas e remove as disciplinas da lista do usuário.
+
+        :param user_id: ID do usuário a ser removido.
+        :param course_id: ID do curso ao qual as disciplinas pertencem.
+        :param discipline_ids: Lista de IDs das disciplinas das quais o usuário será removido.
+        :param type_help: Tipo de ajuda, 'offer_help' para helpers e 'seek_help' para seekers.
+        """
         collection_name = "helpers" if type_help == "offer_help" else "seekers"
         for discipline_id in discipline_ids:
             DisciplineRepository.remove_user_from_discipline(user_id, discipline_id, type_help, course_id)

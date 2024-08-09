@@ -24,10 +24,10 @@ class DeleteDisciplinesRequest(BaseModel):
     discipline_ids: List[str]
     type_help: str
 
-
+# Injeção de Dependencia - Aqui estamos injetando a dependência AuthControl e criando uma instância de UserControl.
 def get_user(token: str = Depends(oauth2_scheme)) -> UserControl:
     user = auth_control.get_current_user(token)
-    return UserControl(user)
+    return UserControl(user)  # Retorna uma instância de UserControl com o usuário encapsulado
 
 
 @router.get("/courses", response_model=List[CourseResponse])
@@ -111,7 +111,7 @@ def get_saved_helpers_disciplines(user_id: str, user: UserControl = Depends(get_
     """
     try:
         discipline_ids = user.get_saved_disciplines(user_id, type_help="offer_help")
-        course_id = "yvm1KcPdwS1i64VPsj9Y"  # Substitua pelo ID do curso apropriado, se necessário
+        course_id = "yvm1KcPdwS1i64VPsj9Y"
         disciplines = user.get_disciplines_details(course_id, discipline_ids)
         return [DisciplineResponse(
             id=d.id,
