@@ -14,11 +14,11 @@ const Tab = createBottomTabNavigator();
 function MainTabNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Editar Modo" component={ModeSelectionScreen} />
+      <Tab.Screen name="Tela de receber ajuda" component={HomeScreen} />
+      <Tab.Screen name="Tela do ajudador" component={OfferHelpScreen} />
       <Tab.Screen name="Mensagens" component={MessagesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Admin" component={AdminPanelScreen} />
+      <Tab.Screen name="Gerenciar cursos e disciplinas" component={AdminPanelScreen} />
     </Tab.Navigator>
   );
 }

@@ -1,7 +1,7 @@
 // firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence, getIdToken } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -55,5 +55,13 @@ const getAuthToken = async () => {
     return null;
   }
 };
+
+// const getUserId = async () => {
+//   const user = getAuth().currentUser;
+//   console.log("USER", user)
+//   user_id = user.uid
+//   console.log("USER", user)
+//   return user;
+// }
 
 export { auth, db, app, createUserWithRole, getAuthToken };

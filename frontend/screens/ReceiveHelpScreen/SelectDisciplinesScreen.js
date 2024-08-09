@@ -3,51 +3,75 @@ import { View, FlatList, StyleSheet, Alert } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Button, Title, ActivityIndicator } from 'react-native-paper';
 import api from '../../services/api';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { getAuth } from 'firebase/auth';
 
 const SelectDisciplinesScreen = () => {
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [disciplines, setDisciplines] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false); // Estado para controlar o carregamento durante o salvamento
   const [courseId, setCourseId] = useState(null);
+  const [editing, setEditing] = useState(false);
 
-  const fetchCourses = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/courses');
-      console.log('Courses:', response.data); // Verifique a resposta aqui
-      setCourses(response.data);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      Alert.alert('Erro', 'Erro ao buscar cursos');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const navigation = useNavigation();
+  const route = useRoute();
 
-  const fetchDisciplines = async () => {
-    if (!courseId) return;
-
-    setLoading(true);
-    try {
-      const response = await api.get(`/courses/${courseId}/disciplines`);
-      console.log('Disciplines:', response.data); // Verifique a resposta aqui
-      setDisciplines(response.data);
-    } catch (error) {
-      console.error('Error fetching disciplines:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { selectedSubjects: initialSelectedSubjects, courseId: initialCourseId } = route.params || {};
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const coursesResponse = await api.get('/courses');
+        setCourses(coursesResponse.data);
+
+        // Se há um curso inicial, define-o
+        if (initialCourseId) {
+          const initialCourse = coursesResponse.data.find(course => course.id === initialCourseId);
+          setSelectedCourse(initialCourse);
+          setCourseId(initialCourseId);
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        Alert.alert('Erro', 'Erro ao buscar cursos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCourses();
-  }, []);
+  }, [initialCourseId]);
 
   useEffect(() => {
+    const fetchDisciplines = async () => {
+      if (courseId) {
+        try {
+          setLoading(true);
+          const disciplinesResponse = await api.get(`/courses/${courseId}/disciplines`);
+          setDisciplines(disciplinesResponse.data);
+        } catch (error) {
+          console.error('Error fetching disciplines:', error);
+          Alert.alert('Erro', 'Erro ao buscar disciplinas');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchDisciplines();
   }, [courseId]);
+
+  useEffect(() => {
+    if (initialSelectedSubjects) {
+      setSelectedSubjects(initialSelectedSubjects.map(subject => subject.id));
+    }
+    if (initialCourseId) {
+      setCourseId(initialCourseId);
+      setEditing(true);
+    }
+  }, [initialSelectedSubjects, initialCourseId]);
 
   const toggleSubjectSelection = (subjectId) => {
     setSelectedSubjects((prev) => {
@@ -71,12 +95,38 @@ const SelectDisciplinesScreen = () => {
 
   const handleCourseSelection = (course) => {
     setSelectedCourse(course);
-    setCourseId(course.id); // Atualizar o courseId com o id do curso
-    setSelectedSubjects([]); // Resetar disciplinas selecionadas ao escolher um novo curso
+    setCourseId(course.id);
+    setSelectedSubjects([]);
   };
 
-  const handleSave = () => {
-    console.log('Alterações salvas:', selectedCourse, selectedSubjects);
+  const handleSave = async () => {
+    setSaving(true); // Inicia o carregamento
+    try {
+      const typeHelp = 'seek_help'; // Ou 'seek_help', dependendo da lógica
+
+      const payload = {
+        user_id: getAuth().currentUser.uid,
+        course_id: courseId,
+        discipline_ids: selectedSubjects,
+        type_help: typeHelp,
+      };
+
+      const response = editing
+        ? await api.put('/disciplines/update', payload)
+        : await api.post('/disciplines/assign', payload);
+
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Alterações salvas com sucesso');
+        navigation.goBack();
+      } else {
+        Alert.alert('Erro', 'Erro ao salvar as alterações');
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      Alert.alert('Erro', 'Erro ao salvar as alterações');
+    } finally {
+      setSaving(false); // Finaliza o carregamento
+    }
   };
 
   const handleCancel = () => {
@@ -84,8 +134,25 @@ const SelectDisciplinesScreen = () => {
     setCourseId(null);
     setSelectedSubjects([]);
     setDisciplines([]);
-    console.log('Alterações canceladas');
+    navigation.goBack();
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (saving) {
+    return (
+      <View style={styles.savingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Title style={styles.savingText}>Salvando alterações...</Title>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -100,30 +167,23 @@ const SelectDisciplinesScreen = () => {
         onChange={handleCourseSelection}
         style={styles.dropdown}
         containerStyle={styles.dropdownContainer}
-        disabled={loading}
+        disabled={loading || saving}
       />
 
       {selectedCourse && (
         <>
           <View style={styles.spacing} />
           <Title style={styles.headerText}>Disciplinas</Title>
-          
-          {loading ? (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" />
-            </View>
-          ) : (
-            <FlatList
-              data={disciplines}
-              renderItem={renderSubjectItem}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContainer}
-            />
-          )}
+          <FlatList
+            data={disciplines}
+            renderItem={renderSubjectItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+          />
         </>
       )}
 
-      {selectedCourse && selectedSubjects.length > 0 && ( // Condicional para mostrar os botões apenas quando uma disciplina for selecionada
+      {selectedCourse && selectedSubjects.length > 0 && (
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleSave} style={styles.saveButton}>
             Salvar
@@ -142,7 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#fff',
-    justifyContent: 'flex-start', // Ajustar o conteúdo para começar do topo
+    justifyContent: 'flex-start',
   },
   dropdown: {
     backgroundColor: '#fff',
@@ -161,7 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: 'black', // Cor do texto para preto
+    color: 'black',
   },
   listContainer: {
     paddingBottom: 16,
@@ -174,7 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
-    marginBottom: 32, // Adicionar margem inferior para os botões
+    marginBottom: 32,
   },
   saveButton: {
     flex: 1,
@@ -185,22 +245,24 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   spacing: {
-    height: 16, // Espaçamento entre o campo de curso e disciplinas
+    height: 16,
   },
-  loaderContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
-  loader: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 5,
-    borderColor: 'black',
-    borderTopColor: 'transparent',
-    borderStyle: 'solid',
-    transform: [{ rotate: '45deg' }],
+  savingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  savingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

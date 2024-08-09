@@ -4,6 +4,7 @@ import AppNavigator from './navigation/AppNavigation';
 import AuthNavigator from './navigation/AuthNavigation';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Provider as PaperProvider } from 'react-native-paper'; // Importe o Provider
+import { NavigationProvider } from './navigation/NavigationContext'; // Importe o NavigationProvider
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,8 +29,10 @@ export default function App() {
   }
 
   return (
-    <PaperProvider>
-      {user ? <AppNavigator /> : <AuthNavigator />}
-    </PaperProvider>
+    <NavigationProvider>
+      <PaperProvider>
+        {user ? <AppNavigator /> : <AuthNavigator />}
+      </PaperProvider>
+    </NavigationProvider>
   );
 }

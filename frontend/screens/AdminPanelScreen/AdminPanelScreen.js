@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  FlatList,
-  ActivityIndicator,
+  FlatList
 } from 'react-native';
-import { IconButton, Menu, Button, TextInput as PaperTextInput, Dialog, Portal, Provider } from 'react-native-paper';
+import { IconButton, Menu, Button, TextInput as PaperTextInput, Dialog, Portal, Provider, ActivityIndicator, FAB } from 'react-native-paper';
 import api from '../../services/api';
 import { useNavigation } from '@react-navigation/native';
+import COLORS from '../../constants/colors';
 
 const AdminPanelScreen = () => {
   const [courses, setCourses] = useState([]);
@@ -92,7 +92,7 @@ const AdminPanelScreen = () => {
   };
 
   const handleCoursePress = (course) => {
-    navigation.navigate('ManageDisciplineScreen', { courseId: course.id });
+    navigation.navigate('Gerenciar disciplinas', { courseId: course.id });
   };
 
   const showMenu = (courseId) => {
@@ -157,14 +157,22 @@ const AdminPanelScreen = () => {
                 )}
               />
             )}
+            <FAB
+            style={styles.fab}
+            icon="plus"
+            label="Adicionar Curso"
+            onPress={() => {
+              setAddCourseModalVisible(true)
+            }}
+            />
 
-            <Button
+            {/* <Button
               mode="contained"
               style={styles.addButton}
               onPress={() => setAddCourseModalVisible(true)}
             >
               Adicionar Curso
-            </Button>
+            </Button> */}
 
             <Portal>
               {/* Modal para Adicionar Curso */}
@@ -257,6 +265,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: '#888',
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 15,
+    backgroundColor: COLORS.green,
+    color: "#fff"
   },
   courseItem: {
     padding: 15,
