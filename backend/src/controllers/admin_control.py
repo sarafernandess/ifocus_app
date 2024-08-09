@@ -4,6 +4,13 @@ from user_control import UserControl
 
 
 class AdminControl(UserControl):
+    # def __init__(self, user):
+    #     """
+    #     Inicializa o controlador de admin com um usuário.
+    #
+    #     :param user: Instância do usuário que está controlando.
+    #     """
+    #     super().__init__(user)  # Chama o construtor da classe pai (UserControl)
 
     def create_course(self, id: None, name, code):
         """Cria um novo curso com o nome e código fornecidos."""
