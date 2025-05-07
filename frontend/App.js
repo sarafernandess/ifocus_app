@@ -3,8 +3,17 @@ import { View, ActivityIndicator } from 'react-native';
 import AppNavigator from './navigation/AppNavigation';
 import AuthNavigator from './navigation/AuthNavigation';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Provider as PaperProvider } from 'react-native-paper'; // Importe o Provider
-import { NavigationProvider } from './navigation/NavigationContext'; // Importe o NavigationProvider
+import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper'; // Importando o DefaultTheme
+import { NavigationProvider } from './navigation/NavigationContext';
+
+// Crie um tema customizado com a cor primária desejada
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#13BE96', // Define a cor primária
+  },
+};
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,14 +32,13 @@ export default function App() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
 
   return (
     <NavigationProvider>
-      <PaperProvider>
+      <PaperProvider theme={theme}>
         {user ? <AppNavigator /> : <AuthNavigator />}
       </PaperProvider>
     </NavigationProvider>

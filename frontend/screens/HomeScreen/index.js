@@ -26,19 +26,29 @@ const HomeScreen = () => {
     }
   };
 
+  // useEffect(() => {
+  //   if (selectedSubjects.length === 0) {
+  //     fetchData();
+  //   }
+  // }, []); // Ou se preferir, pode manter o isFocused e adicionar essa verificação
+  
   useEffect(() => {
-    if (isFocused) {
-      fetchData();
-    }
-  }, [isFocused]);
-
+    fetchData();
+  }, []); // busca apenas na montagem
+  
   const handleEditSubjects = () => {
     navigation.navigate('Selecionar curso e disciplinas', { 
-      onReturn: (subjects) => setSelectedSubjects(subjects),
+      onReturn: (subjects) => {
+        console.log('Retorno da tela de edição:', subjects);
+        setSelectedSubjects(subjects);
+      },
       selectedSubjects,
-      courseId: "yvm1KcPdwS1i64VPsj9Y" // Substitua pelo ID do curso atual se disponível
+      courseId: "yvm1KcPdwS1i64VPsj9Y"
     });
   };
+  
+
+  
 
   if (loading) {
     return (

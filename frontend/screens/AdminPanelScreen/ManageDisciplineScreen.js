@@ -121,7 +121,7 @@ const ManageDisciplineScreen = () => {
     <View style={styles.container}>
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color='#13BE96'/>
         </View>
       ) : (
         <>

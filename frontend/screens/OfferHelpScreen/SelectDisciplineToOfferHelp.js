@@ -66,15 +66,19 @@ const SelectDisciplineToOfferHelp = () => {
     });
   };
 
-  const renderSubjectItem = ({ item }) => (
-    <Button
-      mode={selectedSubjects.includes(item.id) ? 'contained' : 'outlined'}
-      onPress={() => toggleSubjectSelection(item.id)}
-      style={styles.subjectButton}
-    >
-      {item.name}
-    </Button>
-  );
+  const renderSubjectItem = ({ item }) => {
+    const isSelected = selectedSubjects.includes(item.id);
+    return (
+      <Button
+        mode={isSelected ? 'contained' : 'outlined'}
+        onPress={() => toggleSubjectSelection(item.id)}
+        buttonColor="#13BE96"
+        labelStyle={isSelected ? { color: '#fff' } : {}}
+      >
+        {item.name}
+      </Button>
+    );
+  };  
 
   const handleCourseSelection = async (course) => {
     setSelectedCourse(course);
@@ -108,6 +112,7 @@ const SelectDisciplineToOfferHelp = () => {
 
       if (response.status === 200) {
         Alert.alert('Sucesso', 'Alterações salvas com sucesso');
+        route.params.onReturn(updatedSubjects);
         navigation.goBack();
       } else {
         Alert.alert('Erro', 'Erro ao salvar as alterações');
@@ -132,7 +137,7 @@ const SelectDisciplineToOfferHelp = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator style={{color:"#13BE96"}} size="large" color="#13BE96" />
       </View>
     );
   }
@@ -140,7 +145,7 @@ const SelectDisciplineToOfferHelp = () => {
   if (saving) {
     return (
       <View style={styles.savingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator tyle={{color:"#13BE96"}} size="large" color="#13BE96" />
         <Title style={styles.savingText}>Salvando alterações...</Title>
       </View>
     );
@@ -177,9 +182,16 @@ const SelectDisciplineToOfferHelp = () => {
 
       {selectedCourse && selectedSubjects.length > 0 && (
         <View style={styles.buttonContainer}>
-          <Button mode="contained" onPress={handleSave} style={styles.saveButton}>
+          <Button 
+            mode="contained" 
+            onPress={handleSave} 
+            buttonColor="#13BE96"
+            labelStyle={{ color: '#fff' }}
+          >
             Salvar
           </Button>
+
+
           <Button mode="outlined" onPress={handleCancel} style={styles.cancelButton}>
             Cancelar
           </Button>
@@ -189,73 +201,9 @@ const SelectDisciplineToOfferHelp = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'flex-start',
-  },
-  dropdown: {
-    backgroundColor: '#fff',
-    borderColor: '#007bff',
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    height: 50,
-  },
-  dropdownContainer: {
-    marginTop: 8,
-    borderRadius: 4,
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: 'black',
-  },
-  listContainer: {
-    paddingBottom: 16,
-  },
-  subjectButton: {
-    marginBottom: 8,
-    width: '100%',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-    marginBottom: 32,
-  },
-  saveButton: {
-    flex: 1,
-    marginRight: 8,
-  },
-  cancelButton: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  spacing: {
-    height: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  savingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  savingText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  
 });
 
 export default SelectDisciplineToOfferHelp;

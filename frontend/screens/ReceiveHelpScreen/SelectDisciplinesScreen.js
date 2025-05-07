@@ -140,7 +140,7 @@ const SelectDisciplinesScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -148,7 +148,7 @@ const SelectDisciplinesScreen = () => {
   if (saving) {
     return (
       <View style={styles.savingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" />
         <Title style={styles.savingText}>Salvando alterações...</Title>
       </View>
     );

@@ -3,10 +3,9 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../../screens/LoginScreen';
-import SignupScreen from '../../screens/SignupScreen';
 import WelcomeScreen from '../../screens/WelcomeScreen';
 import ResetPasswordScreen from '../../screens/ResetPasswordScreen';
-import MainTabNavigator from '../../components/MainTabNavigator';
+import SignUpScreen from '../../screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,12 +21,12 @@ function AuthNavigator() {
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
-          options={{ gestureEnabled: false }} 
+          options={{ gestureEnabled: true, headerShown: false }} 
         />
         <Stack.Screen 
           name="SignUp" 
-          component={SignupScreen} 
-          options={{headerShown: true, gestureEnabled: true }} 
+          component={SignUpScreen} 
+          options={{ gestureEnabled: true }} 
         />
         <Stack.Screen 
           name="ResetPassword" 

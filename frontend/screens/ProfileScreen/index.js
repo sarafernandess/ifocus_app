@@ -1,31 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ScrollView, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { 
+  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
+  ScrollView, Alert, Keyboard, TouchableWithoutFeedback, Image 
+} from 'react-native';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { auth, db } from '../../services/firebaseConfig';
-import { CommonActions } from '@react-navigation/native';
-import COLORS from '../../constants/colors'
+import { TextInput, Avatar } from 'react-native-paper';
+import * as ImagePicker from 'expo-image-picker';
+import COLORS from '../../constants/colors';
 
 const ProfileScreen = () => {
   const auth = getAuth();
   const navigation = useNavigation();
+  
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    subjects: [],
-    rating: 0,
+    phone: '',
+    photoURL: '',
   });
 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        console.log('Usuário deslogado');
-      })
-      .catch((error) => {
-        console.error('Erro ao deslogar:', error);
-      });
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -35,15 +32,22 @@ const ProfileScreen = () => {
         if (userDoc.exists()) {
           setUserData(userDoc.data());
         } else {
-          console.log('No such document!');
+          console.log('Nenhum documento encontrado!');
         }
       } else {
         navigation.replace('Welcome');
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => console.log('Usuário deslogado'))
+      .catch((error) => console.error('Erro ao deslogar:', error));
+  };
 
   const saveProfileChanges = async () => {
     try {
@@ -54,50 +58,94 @@ const ProfileScreen = () => {
         Alert.alert('Sucesso', 'Alterações salvas com sucesso!');
       }
     } catch (error) {
-      console.error('Erro ao salvar alterações: ', error);
+      console.error('Erro ao salvar alterações:', error);
     }
+  };
+
+  // Função para escolher uma imagem
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setUserData({ ...userData, photoURL: result.assets[0].uri });
+    }
+  };
+
+  // Função para remover a foto de perfil
+  const removeImage = () => {
+    setUserData({ ...userData, photoURL: '' });
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.title}>Perfil</Text>
+
+          {/* Foto de Perfil */}
+          <View style={styles.avatarContainer}>
+            {userData.photoURL ? (
+              <Avatar.Image size={100} source={{ uri: userData.photoURL }} />
+            ) : (
+              <Avatar.Icon size={100} icon="camera" />
+            )}
+            <View style={styles.avatarButtons}>
+              <TouchableOpacity onPress={pickImage}>
+                <Text style={styles.avatarText}>Alterar Foto</Text>
+              </TouchableOpacity>
+              {userData.photoURL ? (
+                <TouchableOpacity onPress={removeImage}>
+                  <Text style={styles.avatarText}>Remover Foto</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          </View>
+
+          {/* Nome */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Nome:</Text>
             <TextInput
-              style={styles.input}
+              mode="outlined"
               value={userData.name}
               onChangeText={(text) => setUserData({ ...userData, name: text })}
+              style={styles.input}
             />
           </View>
+
+          {/* E-mail (Não editável) */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>E-mail:</Text>
             <TextInput
-              style={styles.input}
+              mode="outlined"
               value={userData.email}
-              editable={false} // Email não editável
+              editable={false} // Email não pode ser alterado
               keyboardType="email-address"
               autoCapitalize="none"
-            />
-          </View>
-          <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Matérias de Interesse:</Text>
-            <TextInput
               style={styles.input}
-              value={userData.subjects ? userData.subjects.join(', ') : ''}
-              onChangeText={(text) => setUserData({ ...userData, subjects: text.split(', ') })}
             />
           </View>
+
+          {/* Telefone */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>Avaliação:</Text>
-            <Text style={styles.rating}>
-              {userData.rating !== undefined ? userData.rating.toFixed(1) : 'N/A'}
-            </Text>
+            <Text style={styles.label}>Telefone:</Text>
+            <TextInput
+              mode="outlined"
+              value={userData.phone}
+              keyboardType="phone-pad"
+              onChangeText={(text) => setUserData({ ...userData, phone: text })}
+              style={styles.input}
+            />
           </View>
+
+          {/* Botões */}
           <TouchableOpacity style={styles.saveButton} onPress={saveProfileChanges}>
             <Text style={styles.saveButtonText}>Salvar Alterações</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
@@ -122,6 +170,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.primary,
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatarButtons: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  avatarText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    marginHorizontal: 10,
   },
   fieldContainer: {
     marginBottom: 20,
@@ -133,16 +195,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: COLORS.grey,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    color: COLORS.black,
-  },
-  rating: {
-    fontSize: 18,
-    color: COLORS.black,
+    backgroundColor: COLORS.white,
   },
   saveButton: {
     backgroundColor: COLORS.primary,
@@ -169,6 +222,5 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
 });
-
 
 export default ProfileScreen;

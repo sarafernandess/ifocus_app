@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   headerImage: {
-    width: 500,
+    width: 600,
     height: 250,
     resizeMode: 'contain',
   },
@@ -127,11 +127,8 @@ const styles = StyleSheet.create({
   form: {
     width: "95%",
     padding: 20,
-    borderRadius: 10,
-    borderWidth: 1,
     borderColor: COLORS.grey,
     marginBottom: 20,
-    shadowRadius: 2,
     elevation: 3,
   },
   input: {
